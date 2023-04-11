@@ -9,61 +9,102 @@ import os
 
 
 def menu():
-    print("Введите 1 дня просмотра телефонной книги")
+    print("Введите 1 для просмотра телефонной книги")
     print("Введите 2 для добавления записи")
-    print("Введите 3 дня удаления записи")
-    choice = input()
+    print("Введите 3 для удаления записи")
+    print("Введите 4 для редактирования")
+    print("Введите 5 для выхода")
+    choice = input("\t")
     return choice
 
-def give_id():
-    if os.path.exists("notebook.json"):
-        with open("notebook.json") as f:
-            phone_book = json.load(f)
-            return len(phone_book.keys())+1
-    else: return 1
+
+def checkfile(file):
+    "Проверка существования файла записной книжки"
+    if os.path.exists(file):
+        return True
+    else: return False
+
+def sh_book(file):
+    with open(file) as f:
+        phone_book = json.load(f)
+        for i in phone_book.values():
+            print(*i)
 
 def writefile(file, phone_book):
-    with open(file, 'a+') as f:
+    "Запись словаря в файл"
+    with open(file, 'a') as f:
         json.dump(phone_book, f)
 
+def rm_rec(file):
+    rm = input('Введите фамилию или имя для удаления записи: ')
+    with open('notebook.json') as f:
+        phone_book = json.load(f)
+        for i, j in phone_book.items():
+            if rm in j:
+                ch = input(f'Запись {j} удалить? (y/n?) ')
+                if ch == "y":
+                    del phone_book[i]
+                    break
+                else: continue
+    with open('notebook.json', 'w') as d:
+        json.dump(phone_book, d)
 
-def addtel(phone_book):
-    list_info = []
-    phone_book.setdefault(give_id(), list_info)
-    a = b = c = None
-    a = input("Ведите имя: ")
-    b = input("Ведите фамилию: ")
-    c = input("Ведите номер: ")
-    list_info.extend([a, b, c])
-#    writefile("notebook.json", phone_book)
-    return phone_book
+def edt(file):
+    ed = input('Введите фамилию или имя для редактирования записи: ')
+    with open('notebook.json') as f:
+        phone_book = json.load(f)
+        for i, j in phone_book.items():
+            if ed in j:
+                ch = input(f'Запись {j} рекактировать? (y/n?) ')
+                if ch == "y":
+                    del phone_book[i]
+                    list_info = []
+                    a = input("Введите имя: ")
+                    b = input("Введите фамилию: ")
+                    c = input("Введите номер: ")
+                    list_info.extend([a, b, c])
+                    with open('notebook.json', 'w') as h:
+                        phone_book[i] = list_info
+                        json.dump(phone_book, h)
+                    break
+            else: continue
 
-#def rmtel(phone_book):
-#    choice = input("Введите имя или фамилию удаляемого контакта")
-#    if os.path.exists("notebook.json"):
-#        with open("notebook.json", "a+") as f:
-#            phone_book = json.load(f)
-#            for i, j in phone_book.items():
-#               if choice in j:
-#                   print('gg')
-
-#                   del phone_book[i]
-#            json.dump(phone_book, f)
-
-
-
-
-phone_book = {}
-#ch = menu()
-#if ch == "1":
-#    with open('notebook.json') as f:
-#            phone_book = json.load(f)
-#            pprint(templates)
-#elif ch =="2":
-#    addtel(phone_book)
-
-g = addtel(phone_book)
-print(*list(*g.values()))
-writefile("notebook.json", phone_book)
+def addtel():
+    if checkfile('notebook.json') == False:
+        phone_book = {}
+        list_info = []
+        a = b = c = None
+        a = input("Введите имя: ")
+        b = input("Введите фамилию: ")
+        c = input("Введите номер: ")
+        list_info.extend([a, b, c])
+        phone_book[1] = list_info
+        print(phone_book)
+        writefile('notebook.json', phone_book)
+    else:
+        list_info = []
+        a = b = c = None
+        a = input("Введите имя: ")
+        b = input("Введите фамилию: ")
+        c = input("Введите номер: ")
+        list_info.extend([a, b, c])
+        print(list_info)
+        with open('notebook.json') as f:
+            phone_book = json.load(f)
+        with open('notebook.json', 'w') as h:
+            phone_book[len(phone_book.keys())+1] = list_info
+            json.dump(phone_book, h)
 
 
+while True:
+    ch = menu()
+    if ch == '2':
+        addtel()
+    elif ch == '1':
+        sh_book('notebook.json')
+    elif ch == '4':
+        edt('notebook.json')
+    elif ch == '3':
+         rm_rec('notebook.json')
+    elif ch == '5':
+        exit()
